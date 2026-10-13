@@ -356,14 +356,44 @@ opt<LanguageConfig> detect_language(strv filename);
 const vec<LanguageConfig>& all_languages();
 ```
 
-Implement configs for: **C++**, **Python**, **TypeScript/JavaScript**, **Go**,
-**Rust**, **Java** (6 languages covers >95% of real-world use).
+Implement configs for 9 languages:
+
+| Language            | Extensions              | `indent_weight` | `line_comment` | `block_comment`  |
+|---------------------|-------------------------|-----------------|----------------|------------------|
+| C++                 | `.cpp .cc .cxx .h .hpp` | 0.25            | `//`           | `/* */`          |
+| Python              | `.py`                   | 0.50            | `#`            | `""" """`        |
+| TypeScript/JS       | `.ts .tsx .js .jsx`     | 0.25            | `//`           | `/* */`          |
+| Go                  | `.go`                   | 0.25            | `//`           | `/* */`          |
+| Rust                | `.rs`                   | 0.25            | `//`           | `/* */`          |
+| Java                | `.java`                 | 0.25            | `//`           | `/* */`          |
+| Scala               | `.scala`                | 0.25            | `//`           | `/* */`          |
+| Clojure             | `.clj .cljs .cljc`      | 0.25            | `;`            | none             |
+| Haskell             | `.hs .lhs`              | 0.40            | `--`           | `{- -}`          |
+
+**Notable keyword weights per language:**
+
+*Scala* — `class`/`object`/`trait`: 2.0; `def`/`type`: 1.5; `val`/`var`: 0.8;
+`case`/`extends`/`with`: 0.5; `import`/`package`: 0.8
+
+*Clojure* — `defn`/`defmacro`/`defprotocol`/`deftype`/`defrecord`: 2.0;
+`ns`/`defmulti`/`defmethod`: 1.5; `def`: 1.0;
+`extend-type`/`extend-protocol`: 1.3; `let`/`do`: 0.3
+
+*Haskell* — `data`/`newtype`/`class`/`instance`: 2.0; `type`: 1.5;
+`module`/`import`: 0.8; `where`: 0.5; `do`/`let`/`in`: 0.3
+
+Haskell `indent_weight` is 0.40 (between Python and C-family) because layout
+rules make indentation semantically significant but less strictly than Python.
+Clojure has no block comment syntax — `#_` is a reader macro (form-level skip),
+not a delimiter pair; treat it as a single-token comment mask rather than a
+tracked open/close state.
 
 Detection: match file extension, fall back to a generic config with
 `CODE_LINE_BASE` only (no keyword weights).
 
 **Acceptance:** `detect_language("foo.py")` returns Python config with
-`indent_weight = 0.5`.
+`indent_weight = 0.5`; `detect_language("foo.clj")` returns Clojure config
+with `;` as line comment and empty block comment delimiters.
 
 ---
 
