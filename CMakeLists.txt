@@ -24,30 +24,37 @@ if(NOT CLI11_FOUND)
   FetchContent_MakeAvailable(CLI11)
 endif()
 
-file(GLOB_RECURSE SOURCES
+# Implementation library — all sources except main.cpp.
+# Both the CLI executable and the test binary link against this.
+file(GLOB_RECURSE LIB_SOURCES
   CONFIGURE_DEPENDS
   "${CMAKE_SOURCE_DIR}/src/*.cpp"
 )
+list(FILTER LIB_SOURCES EXCLUDE REGEX ".*/main\\.cpp$")
 
-add_executable(wavelet_analysis ${SOURCES})
+add_library(wavelet_analysis_lib STATIC ${LIB_SOURCES})
 
-target_include_directories(wavelet_analysis
-  PRIVATE
+target_include_directories(wavelet_analysis_lib
+  PUBLIC
     "${CMAKE_SOURCE_DIR}/src"
 )
 
-target_link_libraries(wavelet_analysis
-  PRIVATE
-    CLI11::CLI11
-)
-
-target_compile_options(wavelet_analysis
+target_compile_options(wavelet_analysis_lib
   PRIVATE
     -Wall
     -Wextra
     -Wpedantic
     $<$<CONFIG:Release>:-O3 -DNDEBUG>
     $<$<CONFIG:Debug>:-O0 -g>
+)
+
+# CLI executable
+add_executable(wavelet_analysis "${CMAKE_SOURCE_DIR}/src/main.cpp")
+
+target_link_libraries(wavelet_analysis
+  PRIVATE
+    wavelet_analysis_lib
+    CLI11::CLI11
 )
 
 if(CMAKE_PROJECT_NAME STREQUAL PROJECT_NAME)

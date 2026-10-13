@@ -348,8 +348,8 @@ struct LanguageConfig {
   vec<str>             extensions;
   umap<str, float>     structural_keywords;
   float                indent_weight;
-  str                  line_comment;    // e.g. "//"
-  s::pair<str, str>    block_comment;   // e.g. {"/*", "*/"}
+  str                    line_comment;   // e.g. "//"
+  opt<s::pair<str, str>> block_comment; // nullopt = no block comments (Clojure)
 };
 
 opt<LanguageConfig> detect_language(strv filename);
