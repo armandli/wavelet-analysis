@@ -335,6 +335,12 @@ Steps are ordered by dependency. Complete each before starting the next.
 
 Verify with: `make build`
 
+**Checklist:**
+- [x] `CMakeLists.txt` with FetchContent for CLI11
+- [x] `Makefile` with `build` / `release` / `test` / `clean` / `compdb` / `run` targets
+- [x] `src/main.cpp` CLI skeleton
+- [x] `src/util/aliases.h`
+
 ---
 
 ### Step 2: Language Configuration
@@ -395,6 +401,19 @@ Detection: match file extension, fall back to a generic config with
 `indent_weight = 0.5`; `detect_language("foo.clj")` returns Clojure config
 with `;` as line comment and empty block comment delimiters.
 
+**Checklist:**
+- [x] `lang_config.h` — `LanguageConfig` struct + function declarations
+- [ ] `all_languages()` — C++ config
+- [ ] `all_languages()` — Python config
+- [ ] `all_languages()` — TypeScript/JS config
+- [ ] `all_languages()` — Go config
+- [ ] `all_languages()` — Rust config
+- [ ] `all_languages()` — Java config
+- [ ] `all_languages()` — Scala config
+- [ ] `all_languages()` — Clojure config
+- [ ] `all_languages()` — Haskell config
+- [ ] `detect_language()` — extension extraction + registry lookup
+
 ---
 
 ### Step 3: File I/O
@@ -415,6 +434,11 @@ format it for the CLI without try/catch noise.
 
 **Acceptance:** reads a 10 000-line file correctly; returns descriptive error
 for missing or unreadable paths.
+
+**Checklist:**
+- [ ] `ReadResult` struct
+- [ ] `read_file()` — `std::ifstream` read, line collection
+- [ ] `read_file()` — descriptive error string for missing / unreadable paths
 
 ---
 
@@ -437,6 +461,18 @@ multi-line strings are rare and can be skipped for now.
 - Same `if` at depth 4 → ≈ 0.15
 
 **Resources:** Algorithm Reference §1 above.
+
+**Checklist:**
+- [ ] `mask_strings()` — replace string literal contents with spaces
+- [ ] Block comment state tracking
+- [ ] Line comment stripping
+- [ ] Tokenization — split on non-word chars, lowercase
+- [ ] Keyword scoring — sum `structural_keywords` weights per token
+- [ ] `CODE_LINE_BASE` fallback for non-blank, non-keyword lines
+- [ ] Blank / pure-comment line zeroing
+- [ ] Indent depth attenuation
+- [ ] `MAX_SCORE` clamping
+- [ ] `compute_signal()` — wire all 10 pipeline steps
 
 ---
 
@@ -467,6 +503,11 @@ convolution using `std::fft` (C++26) or a small FFT library.
   should equal the kernel evaluated at the shift from p
 
 **Resources:** Algorithm Reference §§2–3 above.
+
+**Checklist:**
+- [ ] `make_kernel()` — Ricker formula + zero-mean correction
+- [ ] `reflect_index()` — symmetric boundary reflection helper
+- [ ] `compute_cwt()` — direct convolution loop over all scales
 
 ---
 
@@ -504,6 +545,12 @@ vec<Peak> snap_peaks(
 
 **Resources:** Algorithm Reference §4 above.
 
+**Checklist:**
+- [ ] `detect_peaks()` — local maximum detection with plateau rule
+- [ ] `detect_peaks()` — sort candidates by `|coefficient|` descending
+- [ ] `detect_peaks()` — ridge collapse (greedy deduplication within `ridge_window`)
+- [ ] `snap_peaks()` — scan ±`snap_radius` for nearest semantic line
+
 ---
 
 ### Step 7: Multi-Resolution Context
@@ -527,6 +574,11 @@ Context build_context(
 
 **Acceptance:** querying line 50 of a 200-line file with radius=100 returns
 fine lines 45–55, medium peaks in [0,150], coarse peaks in [0,150].
+
+**Checklist:**
+- [ ] `build_context()` — fine window (lines ±`window` around center)
+- [ ] `build_context()` — medium band: filter peaks at scales 1–16 within radius, sort by distance
+- [ ] `build_context()` — coarse band: filter peaks at scales 32–128 within radius, sort by distance
 
 ---
 
@@ -557,6 +609,12 @@ MultiLevelDWT haar_dwt(const Signal& signal, int max_levels = 8);
 
 **Resources:** Algorithm Reference §6 above; Strang & Nguyen §3.1.
 
+**Checklist:**
+- [ ] Pad signal to next power of 2
+- [ ] `haar_single()` — one-level decomposition (`approx` + `detail`)
+- [ ] `haar_dwt()` — multi-level cascade up to `max_levels`
+- [ ] `haar_idwt()` — inverse transform for perfect-reconstruction validation
+
 ---
 
 ### Step 9: Complexity Heatmap
@@ -576,6 +634,10 @@ normalization if max is 0 to avoid divide-by-zero).
   produce high irregularity scores around line 8 and low elsewhere.
 - A constant non-zero signal should produce a zero heatmap.
 
+**Checklist:**
+- [ ] Per-line irregularity scoring: `Σ |detail[level][i >> level]| / 2^level`
+- [ ] Normalize scores to [0, 1] (skip if max is 0)
+
 ---
 
 ### Step 10: Wire Up CLI Commands
@@ -593,6 +655,14 @@ Add a `Commands` struct holding parsed options and a dispatch table:
 | `summary`      | `compute_cwt` → `detect_peaks` → print peak-annotated line slice |
 
 Add a global `--json` flag to each subcommand that switches the output formatter.
+
+**Checklist:**
+- [ ] `analyze` subcommand
+- [ ] `context` subcommand
+- [ ] `coefficients` subcommand
+- [ ] `heatmap` subcommand
+- [ ] `summary` subcommand
+- [ ] Global `--json` flag wired to each subcommand
 
 ---
 
@@ -624,6 +694,12 @@ Table format (default): fixed-width columns, human-readable.
 JSON: hand-rolled (no external library needed; the structures are shallow).
 CSV: for piping into analysis tools.
 
+**Checklist:**
+- [ ] `print_peaks()` — Table / JSON / CSV
+- [ ] `print_coefficients()` — Table / JSON / CSV
+- [ ] `print_context()` — Table / JSON / CSV
+- [ ] `print_heatmap()` — Table / JSON / CSV
+
 ---
 
 ### Step 12: Tests
@@ -651,6 +727,14 @@ Enable with: `make test` (sets `BUILD_TESTS=ON`).
 | `test_haar.cpp`       | perfect reconstruction, constant signal, energy           |
 | `test_heatmap.cpp`    | spike signal, constant signal                             |
 | `test_lang_config.cpp`| extension detection, fallback generic config              |
+
+**Checklist:**
+- [ ] `test_signal.cpp`
+- [ ] `test_cwt.cpp`
+- [ ] `test_peaks.cpp`
+- [ ] `test_haar.cpp`
+- [ ] `test_heatmap.cpp`
+- [x] `test_lang_config.cpp`
 
 ---
 
