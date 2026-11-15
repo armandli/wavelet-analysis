@@ -72,4 +72,3 @@ Report:
 - Whether uncommitted changes were discarded (Step 2)
 - Whether conflicts were resolved by reverting local changes (Step 4)
 - Final sync status (up-to-date, fast-forwarded, or error)
-

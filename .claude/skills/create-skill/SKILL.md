@@ -197,4 +197,3 @@ After creating the skill, guide the user through testing:
 - For the 5 proven skill patterns with details, see [references/patterns.md](references/patterns.md)
 - For the full validation checklist, see [references/checklist.md](references/checklist.md)
 - For hooks best practices (when and how to include hooks in skills), see [references/hooks-best-practices.md](references/hooks-best-practices.md)
-
